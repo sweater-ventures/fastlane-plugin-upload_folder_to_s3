@@ -31,7 +31,7 @@ module Fastlane
             next
           end
 
-          result = "Error while uploadin file #{local_path}"
+          result = "Error while uploading file #{local_path}"
           Actions.lane_context[SharedValues::UPLOAD_FOLDER_TO_S3_RESULT] = result
           return result
         end
@@ -68,8 +68,9 @@ module Fastlane
       def self.valid_s3(awscreds, s3_bucket)
         loaded_original_gem = load_from_original_gem_name
 
-        if !loaded_original_gem || !v1_sdk_module_present?
-          load_from_v1_gem_name
+        if !loaded_original_gem || !aws_sdk_module_present?
+          load_from_aws_gem_name
+          #TODO: Update this
           UI.verbose("Loaded AWS SDK v1.x from the `aws-sdk-v1` gem")
         else
           UI.verbose("Loaded AWS SDK v1.x from the `aws-sdk` gem")
@@ -92,17 +93,17 @@ module Fastlane
           UI.verbose("The 'aws-sdk' gem is not present")
           return false
         end
-        
+
         UI.verbose("The 'aws-sdk' gem is present")
         true
       end
 
-      def self.load_from_v1_gem_name
-        Actions.verify_gem!('aws-sdk-v1')
-        require 'aws-sdk-v1'
+      def self.load_from_aws_gem_name
+        Actions.verify_gem!('aws-sdk')
+        require 'aws-sdk'
       end
 
-      def self.v1_sdk_module_present?
+      def self.aws_sdk_module_present?
         begin
           # Here we'll make sure that the `AWS` module is defined. If it is, the gem is the v1.x API.
           Object.const_get("AWS")
