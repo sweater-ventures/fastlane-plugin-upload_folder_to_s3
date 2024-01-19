@@ -17,7 +17,7 @@ module Fastlane
           region:             s3_region
         }
 
-        result  = ""
+        result  = ''
         bucket  = valid_bucket awscreds, s3_bucket
         files   = files_at_path base_local_path
 
@@ -27,9 +27,7 @@ module Fastlane
 
           obj = write_file_to_bucket(local_path, bucket, s3_path)
 
-          if obj.exists?
-            next
-          end
+          next if obj.exists?
 
           result = "Error while uploading file #{local_path}"
           Actions.lane_context[SharedValues::UPLOAD_FOLDER_TO_S3_RESULT] = result
@@ -41,7 +39,7 @@ module Fastlane
       end
 
       def self.files_at_path(path)
-        files = Dir.glob(path + "/**/*")
+        files = Dir.glob(path + '/**/*')
         to_remove = []
 
         files.each do |file|
@@ -71,15 +69,15 @@ module Fastlane
         if !loaded_original_gem || !aws_sdk_module_present?
           load_from_aws_gem_name
           #TODO: Update this
-          UI.verbose("Loaded AWS SDK v1.x from the `aws-sdk-v1` gem")
+          UI.verbose('Loaded AWS SDK v1.x from the `aws-sdk-v1` gem')
         else
-          UI.verbose("Loaded AWS SDK v1.x from the `aws-sdk` gem")
+          UI.verbose('Loaded AWS SDK v1.x from the `aws-sdk` gem')
         end
 
-        s3 = AWS::S3.new(awscreds)
+        s3 = Aws::S3.new(awscreds)
 
         if s3.buckets[s3_bucket].location_constraint != awscreds[:region]
-          s3 = AWS::S3.new(awscreds.merge(region: s3.buckets[s3_bucket].location_constraint))
+          s3 = Aws::S3.new(awscreds.merge(region: s3.buckets[s3_bucket].location_constraint))
         end
 
         s3
@@ -106,7 +104,7 @@ module Fastlane
       def self.aws_sdk_module_present?
         begin
           # Here we'll make sure that the `AWS` module is defined. If it is, the gem is the v1.x API.
-          Object.const_get("AWS")
+          Object.const_get('Aws')
         rescue NameError
           UI.verbose("Couldn't find the needed `AWS` module in the 'aws-sdk' gem")
           return false
@@ -126,59 +124,71 @@ module Fastlane
       #####################################################
 
       def self.description
-        %q{Upload a folder to S3}
+        'Upload a folder to S3'
       end
 
       def self.details
         [
-          "If you want to use regex to exclude some files, please contribute to this action.",
-          "Else, just do like me and from your artifacts/builds/product folder,",
-          "create the subset you want to upload in another folder and upload it using this action."
+          'If you want to use regex to exclude some files, please contribute to this action.',
+          'Else, just do like me and from your artifacts/builds/product folder,',
+          'create the subset you want to upload in another folder and upload it using this action.'
         ].join("\n")
       end
 
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(key: :access_key_id,
-                                       env_name: "FL_UPLOAD_FOLDER_TO_S3_ACCESS_KEY_ID",
-                                       description: "Access key ID",
+                                       env_name: 'FL_UPLOAD_FOLDER_TO_S3_ACCESS_KEY_ID',
+                                       description: 'Access key ID',
                                        verify_block: proc do |value|
-                                         UI.user_error!(UploadFolderToS3Action.no_access_key_id_error_message) if value.to_s.length == 0
+                                         if value.to_s.empty?
+                                           UI.user_error!(UploadFolderToS3Action.no_access_key_id_error_message)
+                                         end
                                        end),
 
           FastlaneCore::ConfigItem.new(key: :secret_access_key,
-                                      env_name: "FL_UPLOAD_FOLDER_TO_S3_SECRET_ACCESS_KEY",
-                                      description: "Secret access key",
-                                      verify_block: proc do |value|
-                                        UI.user_error!(UploadFolderToS3Action.no_secret_access_key_error_message) if value.to_s.length == 0
-                                      end),
+                                       env_name: 'FL_UPLOAD_FOLDER_TO_S3_SECRET_ACCESS_KEY',
+                                       description: 'Secret access key',
+                                       verify_block: proc do |value|
+                                         if value.to_s.empty?
+                                           UI.user_error!(UploadFolderToS3Action.no_secret_access_key_error_message)
+                                         end
+                                       end),
 
           FastlaneCore::ConfigItem.new(key: :region,
-                                      env_name: "FL_UPLOAD_FOLDER_TO_S3_REGION",
-                                      description: "The region",
-                                      verify_block: proc do |value|
-                                        UI.user_error!(UploadFolderToS3Action.no_region_error_message) if value.to_s.length == 0
-                                      end),
+                                       env_name: 'FL_UPLOAD_FOLDER_TO_S3_REGION',
+                                       description: 'The region',
+                                       verify_block: proc do |value|
+                                         if value.to_s.empty?
+                                           UI.user_error!(UploadFolderToS3Action.no_region_error_message)
+                                         end
+                                       end),
 
           FastlaneCore::ConfigItem.new(key: :bucket,
-                                      env_name: "FL_UPLOAD_FOLDER_TO_S3_BUCKET",
-                                      description: "Bucket",
-                                      verify_block: proc do |value|
-                                        UI.user_error!(UploadFolderToS3Action.no_bucket_error_message) if value.to_s.length == 0
-                                      end),
+                                       env_name: 'FL_UPLOAD_FOLDER_TO_S3_BUCKET',
+                                       description: 'Bucket',
+                                       verify_block: proc do |value|
+                                         if value.to_s.empty?
+                                           UI.user_error!(UploadFolderToS3Action.no_bucket_error_message)
+                                         end
+                                       end),
 
           FastlaneCore::ConfigItem.new(key: :local_path,
-                                      env_name: "FL_UPLOAD_FOLDER_TO_S3_LOCAL_PATH",
-                                      description: "Path to local folder to upload",
-                                      verify_block: proc do |value|
-                                        UI.user_error!(UploadFolderToS3Action.invalid_local_folder_path_message) if value.to_s.length == 0
-                                      end),
+                                       env_name: 'FL_UPLOAD_FOLDER_TO_S3_LOCAL_PATH',
+                                       description: 'Path to local folder to upload',
+                                       verify_block: proc do |value|
+                                         if value.to_s.empty?
+                                           UI.user_error!(UploadFolderToS3Action.invalid_local_folder_path_message)
+                                         end
+                                       end),
 
           FastlaneCore::ConfigItem.new(key: :remote_path,
-                                       env_name: "FL_UPLOAD_FOLDER_TO_S3_REMOTE_PATH",
-                                       description: "The remote base path",
+                                       env_name: 'FL_UPLOAD_FOLDER_TO_S3_REMOTE_PATH',
+                                       description: 'The remote base path',
                                        verify_block: proc do |value|
-                                         UI.user_error!(UploadFolderToS3Action.invalid_remote_folder_path_message) if value.to_s.length == 0
+                                         if value.to_s.empty?
+                                           UI.user_error!(UploadFolderToS3Action.invalid_remote_folder_path_message)
+                                         end
                                        end)
         ]
       end
@@ -191,13 +201,13 @@ module Fastlane
 
       def self.return_value
         [
-          "The return value is an empty string if everything went fine,",
-          "or an explanation of the error encountered."
+          'The return value is an empty string if everything went fine,',
+          'or an explanation of the error encountered.'
         ].join("\n")
       end
 
       def self.authors
-        [%q{teriiehina}]
+        ['teriiehina']
       end
 
       def self.is_supported?(platform)
@@ -205,11 +215,11 @@ module Fastlane
       end
 
       def self.content_type_for_file(file)
-        require "mime/types"
+        require 'mime/types'
 
         mime_type = MIME::Types.type_for(file).first
 
-        return "application/octet-stream" if mime_type.nil?
+        return 'application/octet-stream' if mime_type.nil?
 
         mime_type.content_type
       end
@@ -218,8 +228,8 @@ module Fastlane
       @no_secret_access_key_error_message = "No Secret access key for upload_folder_to_s3 given, pass using `secret_access_key: 'access_key'`"
       @no_region_error_message            = "No region for upload_folder_to_s3 given, pass using `region: 'region'`"
       @no_bucket_error_message            = "No bucket for upload_folder_to_s3 given, pass using `bucket: 'bucket'`"
-      @invalid_local_folder_path_message  = "Invalid local folder path"
-      @invalid_remote_folder_path_message = "Invalid remote folder path"
+      @invalid_local_folder_path_message  = 'Invalid local folder path'
+      @invalid_remote_folder_path_message = 'Invalid remote folder path'
 
       class << self
         attr_accessor :no_access_key_id_error_message
